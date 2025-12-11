@@ -1,3 +1,4 @@
+# Flower class definition
 class Flower:
     def __init__(self, height=0, size=0, color="Unknown", price=0.0, quantity=0, deliveryRate=0.0):
         self.set_height(height)
@@ -62,7 +63,7 @@ class Flower:
         print(f"Flower: color={self.color}, height={self.height}, size={self.size}, "
               f"price={self.price}, quantity={self.quantity}, delivery={self.deliveryRate}")
 
-
+# FlowerShop class to manage a collection of flowers
 class FlowerShop:
     def __init__(self):
         self.flowers = []
@@ -88,7 +89,7 @@ class FlowerShop:
         selected = [f for f in self.flowers if f.deliveryRate < 5]
         total = sum(f.price * f.quantity for f in selected)
         return selected, total
-
+# Bouquet class to manage a collection of flowers
 class Bouquet:
     def __init__(self):
         self.items = []
@@ -106,7 +107,7 @@ class Bouquet:
         for flower, q in self.items:
             print(f"{flower.color} × {q} (price {flower.price})")
         print(f"Total price: {self.total_price()}")
-
+# Main function to demonstrate functionality
 
 def main():
     rose = Flower(height=50, size=6, color="Red", price=50, quantity=20, deliveryRate=5)
