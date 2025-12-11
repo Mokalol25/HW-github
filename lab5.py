@@ -10,7 +10,6 @@ class Flower:
 
     def __del__(self):
         pass
-        print("heloo world")
 
     def get_height(self):
         return self.height
