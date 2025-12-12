@@ -120,7 +120,6 @@ for year in sorted(books_by_year.keys()):
     for title in books_by_year[year]:
         print(f"- {title}")
 
-
 # <?xml version="1.0" encoding="UTF-8"?>
 # <catalog>
 #     <book id="1">
@@ -140,4 +139,5 @@ for year in sorted(books_by_year.keys()):
 #         <author>name_3</author>
 #         <year>2010</year>
 #     </book>
+
 # </catalog>
