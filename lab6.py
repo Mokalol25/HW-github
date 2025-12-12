@@ -121,6 +121,7 @@ for year in sorted(books_by_year.keys()):
         print(f"- {title}")
 
 print("print")
+print("input")
 # <?xml version="1.0" encoding="UTF-8"?>
 # <catalog>
 #     <book id="1">
