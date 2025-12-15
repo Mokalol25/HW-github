@@ -4,34 +4,48 @@ import xml.etree.ElementTree as ET
 
 
 class FileNotFound(Exception):
+    """
+    Custom exception raised when a file is not found.
+    """
     pass
 
 
 class FileCorrupted(Exception):
+    """
+    Custom exception raised when the XML file is corrupted or in an invalid format.
+    """
     pass
+
+
+def setup_logger(func_name, mode="console"):
+    logger = logging.getLogger(func_name)
+    logger.setLevel(logging.ERROR)
+
+    if mode == "console":
+        handler = logging.StreamHandler()
+    else:
+        handler = logging.FileHandler("log.txt", encoding="utf-8")
+
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    handler.setFormatter(formatter)
+
+    # Avoid adding multiple handlers if it's already added
+    if not logger.hasHandlers():
+        logger.addHandler(handler)
+
+    return logger
 
 
 def logged(exception, mode="console"):
     def decorator(func):
+        # Set up the logger once when the decorator is applied
+        logger = setup_logger(func.__name__, mode)
+
         def wrapper(*args, **kwargs):
-            logger = logging.getLogger(func.__name__)
-            logger.setLevel(logging.ERROR)
-
-            if mode == "console":
-                handler = logging.StreamHandler()
-            else:
-                handler = logging.FileHandler("log.txt", encoding="utf-8")
-
-            formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-            handler.setFormatter(formatter)
-
-            logger.handlers.clear()
-            logger.addHandler(handler)
-
             try:
                 return func(*args, **kwargs)
             except exception as e:
-                logger.error(f"Стався виняток {str(e)}")
+                logger.error(f"An exception occurred: {str(e)}")
                 raise
 
         return wrapper
@@ -40,26 +54,29 @@ def logged(exception, mode="console"):
 
 
 class XMLFileManager:
+    """
+    A class for managing an XML file of books, allowing reading, adding, and deleting books.
+    """
 
     @logged(FileNotFound, mode="console")
     def __init__(self, filepath):
         self.filepath = filepath
 
         if not os.path.exists(filepath):
-            raise FileNotFound(f"Файл '{filepath}' не існує")
+            raise FileNotFound(f"File '{filepath}' does not exist")
 
         try:
             self.tree = ET.parse(filepath)
             self.root = self.tree.getroot()
         except Exception:
-            raise FileCorrupted("XML файл пошкоджено або має неправильний формат.")
+            raise FileCorrupted("The XML file is corrupted or in an invalid format.")
 
     @logged(FileCorrupted, mode="console")
     def read(self):
         try:
             return ET.tostring(self.root, encoding="unicode")
         except Exception:
-            raise FileCorrupted("неможливо прочитати XML файл.")
+            raise FileCorrupted("Unable to read the XML file.")
 
     @logged(FileCorrupted, mode="console")
     def append_book(self, book_id, title, author, year):
@@ -73,7 +90,7 @@ class XMLFileManager:
 
             self.tree.write(self.filepath, encoding="utf-8", xml_declaration=True)
         except Exception:
-            raise FileCorrupted("неможливо додати елемент до XML файлу.")
+            raise FileCorrupted("Unable to add a new book to the XML file.")
 
     @logged(FileCorrupted, mode="console")
     def delete_book(self, book_id):
@@ -85,7 +102,7 @@ class XMLFileManager:
                     return True
             return False
         except Exception:
-            raise FileCorrupted("неможливо видалити елемент з XML файлу.")
+            raise FileCorrupted("Unable to delete the book from the XML file.")
 
 
 if __name__ == "__main__":
@@ -102,23 +119,25 @@ if __name__ == "__main__":
     manager.delete_book(3)
     print(manager.read())
 
-print("\n----Відгруповані книги за роками")
+    print("\n----Grouped books by year")
 
-books_by_year = {}
+    books_by_year = {}
 
-for book in manager.root.findall("book"):
-    year = book.find("year").text
-    title = book.find("title").text
+    for book in manager.root.findall("book"):
+        year = book.find("year").text
+        title = book.find("title").text
 
-    if year not in books_by_year:
-        books_by_year[year] = []
+        if year not in books_by_year:
+            books_by_year[year] = []
 
-    books_by_year[year].append(title)
+        books_by_year[year].append(title)
 
-for year in sorted(books_by_year.keys()):
-    print(f"\nРік {year}:")
-    for title in books_by_year[year]:
-        print(f"- {title}")
+    for year in sorted(books_by_year.keys()):
+        print(f"\nYear {year}:")
+        for title in books_by_year[year]:
+            print(f"- {title}")
+
+
 
 # <?xml version="1.0" encoding="UTF-8"?>
 # <catalog>
@@ -141,3 +160,4 @@ for year in sorted(books_by_year.keys()):
 #     </book>
 
 # </catalog>
+
